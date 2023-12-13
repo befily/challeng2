@@ -7,8 +7,16 @@ import GUI from 'lil-gui';
 //CONSTANT & VARIABLES
 let width = window.innerWidth;
 let height = window.innerHeight;
+
 //-- GUI PAREMETERS
- 
+//-- GUI PARAMETERS
+var gui;
+const parameters = {
+  maxI: 12,
+};
+
+
+
 //-- SCENE VARIABLES
 var gui;
 var scene;
@@ -23,18 +31,21 @@ var directionalLight;
 //Create an empty array for storing all the geometrie
 var nodes = [];
 var edges = [];
-var angleMultiplier = 360;
-var level = 4;
+var level = 3;
  
 
 function main(){
   //GUI
+  gui = new GUI();
+  gui.add(parameters, 'maxI', 1, 12, 1).name('Number of branches').onChange(() => {
+    console.log('MaxI changed to:', parameters.maxI);
+  });
     
 
   //CREATE SCENE AND CAMERA
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera( 35, width / height, 0.1, 100);
-  camera.position.set(10, 10, 10)
+  camera.position.set(0, 0, 30)
 
   //LIGHTINGS
   ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -51,7 +62,7 @@ function main(){
   //Testing the Node Class
  
   var location = new THREE.Vector3(0,0,0);
-  generateTree(location, level, 90, null);
+  generateTree(location, level, 30, null);
 
 
   //RESPONSIVE WINDOW
@@ -129,9 +140,9 @@ class TreeNode{
     this.children = [];
 
     //Calculate the angle based on the parent's angle
-    this.angle = this.parentAngle + getRndInteger(0-angleMultiplier/2, angleMultiplier/2) * (Math.PI/180);
+    this.angle = 30 * (Math.PI/180);
 
-    this.length = this.level === 0 ? 2:Math.random() * 2 + 1;
+    this.length = this.level === 0 ? 2 : 2;
 
     //Create the shape for the node
     var nodeGeometry = new THREE.SphereGeometry(0.1, 10, 10);
@@ -151,11 +162,11 @@ class TreeNode{
   }
 
   createChildren(){
-    for(var i=0; i<4; i++){
+    for(var i=0; i< parameters.maxI; i++){
       var childPosition = new THREE.Vector3().copy(this.position);
 
       let axisZ = new THREE.Vector3(0,0,1);
-      let axisY = new THREE.Vector3(0,1,0);
+      let axisY = new THREE.Vector3(0,0,0);
 
       this.parentDirection.applyAxisAngle(axisZ, this.angle);
       this.parentDirection.applyAxisAngle(axisY, this.angle);
@@ -164,7 +175,8 @@ class TreeNode{
       childPosition.y += this.parentDirection.y * this.length;
       childPosition.z += this.parentDirection.z * this.length;
 
-      var child = new TreeNode(childPosition, this.level-1, this.angle, this)
+      var child = new TreeNode(childPosition, this.level - 1, this.angle, this);
+
 
       this.children.push(child);
       
